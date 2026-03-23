@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Claw Command Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: rgba(255,255,255,0.03);
+      --accent-orange: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-green: #22c55e;
+      --accent-blue: #3b82f6;
+      --text-primary: #ffffff;
+      --text-secondary: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Animated background */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(245,158,11,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,158,11,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+    
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 8px 32px rgba(245,158,11,0.3);
+      animation: glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 8px 32px rgba(245,158,11,0.3); }
+      50% { box-shadow: 0 8px 48px rgba(245,158,11,0.5); }
+    }
+    
+    .brand-text h1 {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .brand-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: rgba(34,197,94,0.1);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 50px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.1); }
+    }
+    
+    .status-text {
+      font-size: 12px;
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+    
+    /* Dashboard Grid */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    @media (max-width: 900px) {
+      .dashboard { grid-template-columns: 1fr; }
+    }
+    
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      border-color: rgba(245,158,11,0.3);
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .card-title .icon {
+      font-size: 20px;
+    }
+    
+    .badge {
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .badge-urgent {
+      background: rgba(239,68,68,0.15);
+      color: var(--accent-red);
+      border: 1px solid rgba(239,68,68,0.3);
+      animation: urgentPulse 1.5s infinite;
+    }
+    
+    @keyframes urgentPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .badge-warning {
+      background: rgba(245,158,11,0.15);
+      color: var(--accent-orange);
+    }
+    
+    /* Deadline Items */
+    .deadline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .deadline-item {
+      position: relative;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      border-left: 3px solid;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .deadline-item:hover {
+      background: rgba(255,255,255,0.05);
+      transform: translateX(4px);
+    }
+    
+    .deadline-item.urgent { border-left-color: var(--accent-red); }
+    .deadline-item.warning { border-left-color: var(--accent-orange); }
+    .deadline-item.normal { border-left-color: var(--accent-green); }
+    
+    .deadline-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .deadline-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    
+    .deadline-prize {
+      font-size: 12px;
+      color: var(--accent-green);
+      font-weight: 500;
+    }
+    
+    .deadline-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .countdown {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(239,68,68,0.1);
+      border-radius: 6px;
+      color: var(--accent-red);
+      font-weight: 600;
+    }
+    
+    .deadline-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-orange) 0%, #ea580c 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(245,158,11,0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    .stat-card {
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 12px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .stat-card:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-orange) 0%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    
+    /* Project Status */
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .project-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    
+    .project-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .project-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    
+    .project-info {
+      flex: 1;
+    }
+    
+    .project-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .project-status {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    
+    .project-status.ready { color: var(--accent-green); }
+    .project-status.pending { color: var(--accent-orange); }
+    .project-status.missing { color: var(--accent-red); }
+    
+    .project-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+    
+    .project-check.done {
+      background: rgba(34,197,94,0.2);
+      color: var(--accent-green);
+    }
+    
+    .project-check.pending {
+      background: rgba(245,158,11,0.2);
+      color: var(--accent-orange);
+    }
+    
+    /* Terminal / Log */
+    .terminal {
+      background: #0d0d12;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    .terminal-line {
+      padding: 4px 0;
+      color: var(--text-secondary);
+    }
+    
+    .terminal-line .timestamp {
+      color: #666;
+      margin-right: 8px;
+    }
+    
+    .terminal-line .success { color: var(--accent-green); }
+    .terminal-line .warning { color: var(--accent-orange); }
+    .terminal-line .error { color: var(--accent-red); }
+    
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .action-btn:hover {
+      background: rgba(245,158,11,0.1);
+      border-color: rgba(245,158,11,0.3);
+      transform: translateY(-2px);
+    }
+    
+    .action-icon {
+      font-size: 28px;
+    }
+    
+    .action-label {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Full width cards */
+    .card-full {
+      grid-column: 1 / -1;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.02);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="logo">🐾</div>
+        <div class="brand-text">
+          <h1>Master Claw Command Center</h1>
+          <p>HolySpirit v2.0 | Operations Division</p>
+        </div>
+      </div>
+      <div class="system-status">
+        <div class="status-dot"></div>
+        <span class="status-text">SYSTEM ONLINE</span>
+      </div>
+    </header>
+    
+    <!-- Dashboard -->
+    <div class="dashboard">
+      <!-- Critical Deadlines -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">⏰</span>
+            Critical Deadlines
+          </div>
+          <span class="badge badge-urgent">2 URGENT</span>
+        </div>
+        
+        <div class="deadline-list">
+          <div class="deadline-item urgent">
+            <div class="deadline-top">
+              <span class="deadline-name">🚀 MLH Global Hack Week</span>
+              <span class="deadline-prize">$10,000+</span>
+            </div>
+            <div class="deadline-meta">
+              <span class="countdown">
+                ⏳ <span id="mlh-countdown">18h 24m</span>
+              </span>
+              <span>AI Track</span>
+            </div>
+            <div class="deadline-actions">
+              <button class="btn btn-primary" onclick="submitMLH()">⚡ Submit Now</button>
+              <button class="btn btn-secondary" onclick="remindMLH()">🔔 Remind</button>
+            </div>
+          </div>
+          
+          <div class="deadline-item warning">
+            <div class="deadline-top">
+              <span class="deadline-name">🦊 GitLab AI Hackathon</span>
+              <span class="deadline-prize">$65,000</span>
+            </div>
+            <div class="deadline-meta">
+              <span class="countdown" style="background: rgba(245,158,11,0.1); color: var(--accent-orange);">
+                ⏳ <span id="gitlab-countdown">42h 15m</span>
+              </span>
+              <span>DevOps AI</span>
+            </div>
+            <div class="deadline-actions">
+              <button class="btn btn-primary" onclick="workOnGitLab()">💻 Work on AutoPR</button>
+              <button class="btn btn-secondary" onclick="viewGitLab()">📋 View</button>
+            </div>
+          </div>
+          
+          <div class="deadline-item normal">
+            <div class="deadline-top">
+              <span class="deadline-name">🔷 Encode AI Hackathon</span>
+              <span class="deadline-prize">$65,000</span>
+            </div>
+            <div class="deadline-meta">
+              <span>📅 Due: April 5, 2026</span>
+              <span>~13 days left</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- System Stats -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">📊</span>
+            System Stats
+          </div>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Active Projects</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Deployed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Submitted</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">$205K</div>
+            <div class="stat-label">Prize Pool</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Project Readiness -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">🚀</span>
+            Project Readiness
+          </div>
+        </div>
+        
+        <div class="project-list">
+          <div class="project-item">
+            <div class="project-icon" style="background: rgba(59,130,246,0.2);">🤖</div>
+            <div class="project-info">
+              <div class="project-name">CoralGuard</div>
+              <div class="project-status ready">✅ Ready to Submit</div>
+            </div>
+            <div class="project-check done">✓</div>
+          </div>
+          
+          <div class="project-item">
+            <div class="project-icon" style="background: rgba(245,158,11,0.2);">🔧</div>
+            <div class="project-info">
+              <div class="project-name">AutoPR</div>
+              <div class="project-status pending">⏳ Needs Video</div>
+            </div>
+            <div class="project-check pending">○</div>
+          </div>
+          
+          <div class="project-item">
+            <div class="project-icon" style="background: rgba(34,197,94,0.2);">⚔️</div>
+            <div class="project-info">
+              <div class="project-name">MechForge</div>
+              <div class="project-status ready">✅ Ready</div>
+            </div>
+            <div class="project-check done">✓</div>
+          </div>
+          
+          <div class="project-item">
+            <div class="project-icon" style="background: rgba(239,68,68,0.2);">💰</div>
+            <div class="project-info">
+              <div class="project-name">PayStream</div>
+              <div class="project-status missing">❌ Missed Deadline</div>
+            </div>
+            <div class="project-check done">✓</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">⚡</span>
+            Quick Actions
+          </div>
+        </div>
+        
+        <div class="quick-actions">
+          <a class="action-btn" href="https://github.com/TheMasterClaw" target="_blank">
+            <span class="action-icon">📁</span>
+            <span class="action-label">GitHub</span>
+          </a>
+          
+          <a class="action-btn" href="https://swarmprotocol.fun" target="_blank">
+            <span class="action-icon">🐝</span>
+            <span class="action-label">Swarm</span>
+          </a>
+          
+          <a class="action-btn" href="#" onclick="openTerminal(); return false;">
+            <span class="action-icon">💻</span>
+            <span class="action-label">Terminal</span>
+          </a>
+          
+          <a class="action-btn" href="#" onclick="refreshData(); return false;">
+            <span class="action-icon">🔄</span>
+            <span class="action-label">Refresh</span>
+          </a>
+          
+          <a class="action-btn" href="#" onclick="openSettings(); return false;">
+            <span class="action-icon">⚙️</span>
+            <span class="action-label">Settings</span>
+          </a>
+          
+          <a class="action-btn" href="HACKATHON_DEADLINES.md" target="_blank">
+            <span class="action-icon">📋</span>
+            <span class="action-label">Deadlines</span>
+          </a>
+        </div>
+      </div>
+      
+      <!-- Activity Log -->
+      <div class="card card-full">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="icon">📜</span>
+            Activity Log
+          </div>
+        </div>
+        
+        <div class="terminal" id="terminal">
+          <div class="terminal-line">
+            <span class="timestamp">[01:05:23]</span>
+            <span class="success">✓ PayStream deployed to Vercel</span>
+          </div>
+          <div class="terminal-line">
+            <span class="timestamp">[00:52:18]</span>
+            <span class="warning">⚠ Tether Hackathon deadline passed</span>
+          </div>
+          <div class="terminal-line">
+            <span class="timestamp">[00:47:45]</span>
+            <span class="success">✓ AgentRegistry deployed to Base Sepolia</span>
+          </div>
+          <div class="terminal-line">
+            <span class="timestamp">[00:30:12]</span>
+            <span>➜ MechForge merged 3 sites into 1</span>
+          </div>
+          <div class="terminal-line">
+            <span class="timestamp">[00:15:00]</span>
+            <span class="success">✓ HolySpirit registered on Swarm (ID: Iuh4GHQCVSjJXMo2wxtk)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Update countdowns
+    function updateCountdowns() {
+      const now = new Date();
+      
+      // MLH Deadline: March 24, 2026 23:59 UTC
+      const mlhDeadline = new Date('2026-03-24T23:59:00Z');
+      const mlhDiff = mlhDeadline - now;
+      
+      if (mlhDiff > 0) {
+        const mlhHours = Math.floor(mlhDiff / (1000 * 60 * 60));
+        const mlhMins = Math.floor((mlhDiff % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById('mlh-countdown').textContent = `${mlhHours}h ${mlhMins}m`;
+      } else {
+        document.getElementById('mlh-countdown').textContent = 'OVERDUE';
+        document.getElementById('mlh-countdown').style.color = '#ef4444';
+      }
+      
+      // GitLab Deadline: March 25, 2026 23:59 UTC
+      const gitlabDeadline = new Date('2026-03-25T23:59:00Z');
+      const gitlabDiff = gitlabDeadline - now;
+      
+      if (gitlabDiff > 0) {
+        const gitlabHours = Math.floor(gitlabDiff / (1000 * 60 * 60));
+        const gitlabMins = Math.floor((gitlabDiff % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById('gitlab-countdown').textContent = `${gitlabHours}h ${gitlabMins}m`;
+      }
+    }
+    
+    // Actions
+    function submitMLH() {
+      window.open('https://hackp.ac/ghw-submit', '_blank');
+      logActivity('Opening MLH submission form...');
+    }
+    
+    function remindMLH() {
+      setTimeout(() => {
+        alert('🔔 REMINDER: MLH Hackathon deadline approaching!');
+      }, 3600000); // 1 hour
+      logActivity('⏰ Reminder set for 1 hour');
+    }
+    
+    function workOnGitLab() {
+      window.open('https://github.com/TheMasterClaw/autopr', '_blank');
+      logActivity('💻 Opening AutoPR repository');
+    }
+    
+    function viewGitLab() {
+      window.open('https://about.gitlab.com/community/hackathon/', '_blank');
+    }
+    
+    function openTerminal() {
+      logActivity('💻 Opening terminal...');
+      window.open('https://terminal.openclaw.ai', '_blank');
+    }
+    
+    function refreshData() {
+      logActivity('🔄 Refreshing data...');
+      updateCountdowns();
+      setTimeout(() => logActivity('✓ Data refreshed'), 1000);
+    }
+    
+    function openSettings() {
+      logActivity('⚙️ Opening settings...');
+      alert('Settings panel - Coming soon!');
+    }
+    
+    function logActivity(message) {
+      const terminal = document.getElementById('terminal');
+      const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      line.innerHTML = `<span class="timestamp">[${time}]</span> ${message}`;
+      terminal.insertBefore(line, terminal.firstChild);
+    }
+    
+    // Initialize
+    updateCountdowns();
+    setInterval(updateCountdowns, 60000); // Update every minute
+    
+    // Check deadlines every 5 minutes
+    setInterval(() => {
+      const now = new Date();
+      const mlhDeadline = new Date('2026-03-24T23:59:00Z');
+      const hoursLeft = (mlhDeadline - now) / (1000 * 60 * 60);
+      
+      if (hoursLeft <= 6 && hoursLeft > 5.9) {
+        logActivity('🔔 ALERT: MLH deadline in 6 hours!');
+      }
+      if (hoursLeft <= 1 && hoursLeft > 0.9) {
+        logActivity('🚨 URGENT: MLH deadline in 1 hour!');
+      }
+    }, 300000);
+  </script>
+</body>
+</html>

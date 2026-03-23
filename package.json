@@ -1,0 +1,12 @@
+{
+  "name": "masterclaw-web",
+  "version": "1.0.0",
+  "description": "MasterClaw Command Center - Web Dashboard",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'",
+    "start": "npx serve ."
+  },
+  "keywords": ["dashboard", "hackathon", "deadline-tracker"],
+  "author": "HolySpirit",
+  "license": "MIT"
+}
